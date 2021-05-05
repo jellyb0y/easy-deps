@@ -5,10 +5,12 @@ from .manager import Manager
 from .install import install
 from .uninstall import uninstall
 from .update import update
+from .build import build
+from .publish import publish
 
 setup_params = get_setup_params()
 directive = setup_params and setup_params['directive']
-directive_parmas = setup_params and setup_params['directive_parmas']
+directive_params = setup_params and setup_params['directive_params']
 params = setup_params and setup_params['params']
 
 if not directive:
@@ -20,13 +22,17 @@ rc_path = 'r' in params and params['r']
 manager = Manager(file_path, rc_path)
 
 if directive == 'install':
-    install(manager, directive_parmas, params)
+    install(manager, directive_params, params)
 elif directive == 'uninstall':
-    uninstall(manager, directive_parmas)
+    uninstall(manager, directive_params, params)
 elif directive == 'update':
-    update(manager, directive_parmas)
+    update(manager, directive_params, params)
+elif directive == 'build':
+    build(manager)
+    if directive_params == ['publish']:
+        publish(params)
 elif directive == 'publish':
-    pass
+    publish(params)
 else:
     raise Exception(f'Unexpected directive `{directive}`')
 

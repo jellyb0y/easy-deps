@@ -39,6 +39,6 @@ def get_setup_params():
 
     return {
         'directive': directive,
-        'directive_parmas': directive_parmas,
+        'directive_params': directive_parmas,
         'params': params,
     }

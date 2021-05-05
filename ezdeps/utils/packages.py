@@ -50,7 +50,13 @@ def use_auth(source: str, auth_data: dict = {}):
     domain_regexp = r'//([^/]*)'
     return re.sub(domain_regexp, auth_provider, source)
 
-def manage_package(command: str, name: str, package: dict = None, auth_data: dict = {}):
+def manage_package(
+    command: str,
+    name: str,
+    package: dict = None,
+    auth_data: dict = {},
+    deps = True
+):
         version = package and package['version']
         source = package and package['source']
         if source:
@@ -63,16 +69,17 @@ def manage_package(command: str, name: str, package: dict = None, auth_data: dic
         if system(f'python3 -m pip {command} {req_line}'):
             raise Exception('Error installing pip module')
         
-        try:
-            requirements = ([str(r) for r in get_distribution(name).requires()])
+        if deps:
+            try:
+                requirements = ([str(r) for r in get_distribution(name).requires()])
 
-            for requirement in requirements:
-                req_line = requirement.replace('>', r'\>').replace('<', r'\<')
-                if system(f'python3 -m pip install {req_line}'):
-                    raise Exception('Error installing pip module')
+                for requirement in requirements:
+                    req_line = requirement.replace('>', r'\>').replace('<', r'\<')
+                    if system(f'python3 -m pip install {req_line}'):
+                        raise Exception('Error installing pip module')
 
-        except Exception:
-            pass
+            except Exception:
+                pass
         
         try:
             return get_distribution(name).version

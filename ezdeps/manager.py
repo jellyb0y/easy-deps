@@ -2,6 +2,7 @@ from .utils.constants import PACKAGE_FILE, RC_FILE
 from .utils.merge import merge_dicts
 from .utils.packages import parse_packages, parse_version, manage_package
 
+from platform import python_version
 from json import dumps, loads
 import re
 
@@ -11,12 +12,16 @@ class Manager():
     name: str = None
     version: str = None
     description: str = None
+    documentation_path: str = None
     dependencies: list = None
     dev_dependencies: list = None
     peer_dependencies: list = None
     auth_data: dict = None
     author: dict = None
     scripts: dict = None
+    python_requires: str = None
+    classifiers: list = None
+    include_package_data: bool = None
 
     def __init__(self, file_path: str = None, rc_path: str = None):
         self.file_path = file_path or PACKAGE_FILE
@@ -49,12 +54,16 @@ class Manager():
         self.peer_dependencies = project['peer_dependencies'] if 'peer_dependencies' in project else {}
         self.author = project['author'] if 'author' in project else {}
         self.scripts = project['scripts'] if 'scripts' in project else {}
+        self.documentation_path = 'documentation_path' in project and project['documentation_path']
+        self.python_requires = project['python_requires'] if 'python_requires' in project else f'>={python_version()}'
+        self.classifiers = project['classifiers'] if 'classifiers' in project else []
+        self.include_package_data = 'include_package_data' in project and project['include_package_data']
 
     def parse_rc_file(self):
         self.auth_data = {}
 
         try:
-            fh = open(self.rc_path, 'r+')
+            fh = open(self.rc_path, 'r')
 
             directive_regexp = re.compile(r'\[([^]]*)\]')
             props_regexp = re.compile(r'([^=]*)=([^\s]*)')
@@ -78,17 +87,33 @@ class Manager():
         except Exception:
             pass
 
+    def get_documentation(self):
+        if not self.documentation_path:
+            return None
+        try:
+            fh = open(self.documentation_path, 'r')
+            documentation = fh.read()
+            fh.close()
+        except Exception:
+            return None
+
+        return documentation
+
     def write(self):
         with open(self.file_path, 'w+') as fh:
             project = {
                 'name': self.name,
                 'version': self.version,
                 'description': self.description,
+                'documentation_path': self.documentation_path,
                 'author': self.author,
                 'scripts': self.scripts,
                 'dependencies': self.dependencies,
                 'dev_dependencies': self.dev_dependencies,
                 'peer_dependencies': self.peer_dependencies,
+                'python_requires': self.python_requires,
+                'classifiers': self.classifiers,
+                'include_package_data': self.include_package_data
             }
 
             fh.write(dumps(project, indent=4))
@@ -120,6 +145,19 @@ class Manager():
             }
             
         return pip_requirements
+
+    def get_only_pip_requirements(self, deps_type: str = 'default'):
+        dependencies = self.get_requirements(deps_type)
+        requirements = []
+        
+        for key, dependency in dependencies.items():
+            if ('source' in dependency and dependency['source']):
+                continue
+            
+            version = dependency['version'].replace('\\', '')
+            requirements.append(f'{key}{version}')
+        
+        return requirements
 
     def update_packages(self, packages: dict, deps_type: str = 'default'):
         new_packages = {}
@@ -154,7 +192,13 @@ class Manager():
                 requirements = self.get_requirements(deps_type)
 
         for name, requirement in requirements.items():
-            new_version = manage_package('install', name, requirement, auth_data=self.auth_data)
+            new_version = manage_package(
+                'install',
+                name,
+                requirement,
+                auth_data=self.auth_data,
+                deps=(not packages)
+            )
             if not requirement['deps_version']:
                 requirement['deps_version'] = new_version
 
