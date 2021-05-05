@@ -1,0 +1,26 @@
+Welcome to Easy-Deps!
+
+Common usage:
+    ezdeps <command> [options] [packages]
+
+Commands:
+    install - Install packages
+        options:
+            <-S | --default>? [packages, ...]       Install packages to default dependencies
+            <-D | --development> [packages, ...]    Install packages to dev_dependencies
+            <-A | --all>                            Install packages from dependency list `.ezdeps.json`
+
+    uninstall - Uninstall packages
+        options:
+            [packages, ...]                         Uninstall packages from deps
+
+    update - Update packages
+        options:
+            [packages, ...]                         Update packages in deps
+
+    build - Build package
+
+    publish - Publish packages
+        options:
+            <-C | --clear>                          Clear temp files after publishing
+            <-R | --repository>                     Set up repository name in your `.ezdepsrc`

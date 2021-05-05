@@ -1,0 +1,2 @@
+include ezdeps/.ezdeps.json
+include ezdeps/resources/*
