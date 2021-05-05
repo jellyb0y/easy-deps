@@ -1,4 +1,5 @@
 import re
+from json import loads
 from os import system
 from pkg_resources import get_distribution
 
@@ -43,19 +44,47 @@ def use_auth(source: str, auth_data: dict = {}):
         auth_string = ''
         if domain in auth_data:
             domain_data = auth_data[domain]
-            auth_string = f'{domain_data["USER"]}:{domain_data["PASSWORD"]}@'
+            auth_string = f'{domain_data["user"]}:{domain_data["password"]}@'
 
         return f'//{auth_string}{domain}/'
 
     domain_regexp = r'//([^/]*)'
     return re.sub(domain_regexp, auth_provider, source)
 
+def get_requirements(requirements: dict):
+    pip_requirements = {}
+
+    for name, value in requirements.items():
+        deps_version = value
+        source = None
+        if isinstance(value, dict):
+            deps_version = value['version']
+            source = 'source' in value and value['source']
+
+        version = parse_version(deps_version)
+
+        pip_requirements[name] = {
+            'version': version,
+            'deps_version': deps_version,
+            'source': source
+        }
+        
+    return pip_requirements
+
+def get_pip_requirements(dependencies: dict):
+    requirements = []
+    
+    for key, dependency in dependencies.items():            
+        version = dependency['version'].replace('\\', '')
+        requirements.append(f'{key}{version}')
+    
+    return requirements
+
 def manage_package(
     command: str,
     name: str,
     package: dict = None,
-    auth_data: dict = {},
-    deps = True
+    auth_data: dict = {}
 ):
         version = package and package['version']
         source = package and 'source' in package and package['source']
@@ -69,9 +98,18 @@ def manage_package(
         if system(f'python3 -m pip {command} {req_line}'):
             raise Exception('Error installing pip module')
         
-        if deps:
+        if source:
             try:
-                requirements = ([str(r) for r in get_distribution(name).requires()])
+                pip_package = get_distribution(name)
+                path_to_config = f'{pip_package.location}/{pip_package._key}/.ezdeps.json'
+
+                try:
+                    fh = open(path_to_config, 'r')
+                    body = fh.read()
+                    config = loads(body)
+                    requirements = get_pip_requirements(get_requirements(config['dependencies']))
+                except Exception:
+                    requirements = ([str(r) for r in pip_package.requires()])
 
                 for requirement in requirements:
                     req_line = requirement.replace('>', r'\>').replace('<', r'\<')

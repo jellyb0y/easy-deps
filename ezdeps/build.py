@@ -4,6 +4,7 @@ import os
 from shutil import copyfile
 from .manager import Manager
 from .utils.constants import PACKAGE_FILE, CUR_DIR
+from .utils.packages import get_pip_requirements
 
 def build(manager: Manager):
     sys.argv = [sys.argv[0], 'sdist', 'bdist_wheel']
@@ -23,7 +24,7 @@ def build(manager: Manager):
         long_description=manager.get_documentation(),
         long_description_content_type='text/markdown',
         packages=setuptools.find_packages(),
-        install_requires=manager.get_pip_requirements('peer'),
+        install_requires=get_pip_requirements(manager.get_requirements('default')),
         include_package_data=manager.include_package_data,
         classifiers=manager.classifiers,
         python_requires=manager.python_requires

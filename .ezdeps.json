@@ -1,22 +1,21 @@
 {
     "name": "ezdeps",
-    "version": "1.0.1",
+    "version": "1.0.4",
     "description": "Package manager for python",
     "documentation_path": "./README.md",
     "author": {
-        "name": "Vitaly Kisel<https://github.com/jellyb0y>",
+        "name": "Vitaly Kisel <jellyb0y>",
         "email": "kisel@internet.ru"
     },
     "scripts": [
         "./scripts/ezdeps"
     ],
-    "dependencies": {},
-    "dev_dependencies": {},
-    "peer_dependencies": {
+    "dependencies": {
         "pip": "^20.0.0",
         "wheel": "0.36.2",
         "twine": "3.4.1"
     },
+    "dev_dependencies": {},
     "python_requires": ">=3.8",
     "classifiers": [
         "Programming Language :: Python :: 3.8",

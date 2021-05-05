@@ -1,6 +1,6 @@
 from .utils.constants import PACKAGE_FILE, RC_FILE
 from .utils.merge import merge_dicts
-from .utils.packages import parse_packages, parse_version, manage_package
+from .utils.packages import parse_packages, manage_package, get_requirements
 
 from platform import python_version
 from json import dumps, loads
@@ -15,7 +15,6 @@ class Manager():
     documentation_path: str = None
     dependencies: list = None
     dev_dependencies: list = None
-    peer_dependencies: list = None
     auth_data: dict = None
     author: dict = None
     scripts: dict = None
@@ -51,7 +50,6 @@ class Manager():
         self.description = 'description' in project and project['description']
         self.dependencies = project['dependencies'] if 'dependencies' in project else {} 
         self.dev_dependencies = project['dev_dependencies'] if 'dev_dependencies' in project else {}
-        self.peer_dependencies = project['peer_dependencies'] if 'peer_dependencies' in project else {}
         self.author = project['author'] if 'author' in project else {}
         self.scripts = project['scripts'] if 'scripts' in project else []
         self.documentation_path = 'documentation_path' in project and project['documentation_path']
@@ -66,7 +64,7 @@ class Manager():
             fh = open(self.rc_path, 'r')
 
             directive_regexp = re.compile(r'\[([^]]*)\]')
-            props_regexp = re.compile(r'([^=]*)=([^\s]*)')
+            props_regexp = re.compile(r'([^\s=]*)=([^\s]*)')
             comments_regexp = r'#.*$'
             active_directive = None
 
@@ -80,7 +78,7 @@ class Manager():
                 
                 props_match = props_regexp.search(clear_line)
                 if props_match:
-                    props_name = props_match[1]
+                    props_name = props_match[1].lower()
                     props_value = props_match[2]
                     self.auth_data[active_directive][props_name] = props_value
 
@@ -110,7 +108,6 @@ class Manager():
                 'scripts': self.scripts,
                 'dependencies': self.dependencies,
                 'dev_dependencies': self.dev_dependencies,
-                'peer_dependencies': self.peer_dependencies,
                 'python_requires': self.python_requires,
                 'classifiers': self.classifiers,
                 'include_package_data': self.include_package_data
@@ -123,38 +120,8 @@ class Manager():
         requirements = self.dependencies
         if deps_type == 'development':
             requirements = self.dev_dependencies
-        elif deps_type == 'peer':
-            requirements = self.peer_dependencies
         
-        pip_requirements = {}
-
-        for name, value in requirements.items():
-            deps_version = value if isinstance(value, str) else value['version']
-
-            if isinstance(value, dict):
-                version = parse_version(deps_version)
-                source = value['source']
-            else:
-                version = parse_version(deps_version)
-                source = None
-
-            pip_requirements[name] = {
-                'version': version,
-                'deps_version': deps_version,
-                'source': source
-            }
-            
-        return pip_requirements
-
-    def get_pip_requirements(self, deps_type: str = 'default'):
-        dependencies = self.get_requirements(deps_type)
-        requirements = []
-        
-        for key, dependency in dependencies.items():            
-            version = dependency['version'].replace('\\', '')
-            requirements.append(f'{key}{version}')
-        
-        return requirements
+        return get_requirements(requirements)
 
     def update_packages(self, packages: dict, deps_type: str = 'default'):
         new_packages = {}
@@ -175,8 +142,6 @@ class Manager():
             self.dev_dependencies = merge_dicts(self.dev_dependencies, new_packages)
         elif deps_type == 'default':
             self.dependencies = merge_dicts(self.dependencies, new_packages)
-        elif deps_type == 'peer':
-            self.peer_dependencies = merge_dicts(self.peer_dependencies, new_packages)
 
     def install(self, packages: list = None, deps_type: str = 'default'):
         if packages:
@@ -193,8 +158,7 @@ class Manager():
                 'install',
                 name,
                 requirement,
-                auth_data=self.auth_data,
-                deps=(not packages)
+                auth_data=self.auth_data
             )
             if not requirement['deps_version']:
                 requirement['deps_version'] = new_version
@@ -210,19 +174,15 @@ class Manager():
             if package in self.dev_dependencies:
                 del self.dev_dependencies[package]
 
-            if package in self.peer_dependencies:
-                del self.peer_dependencies[package]
-
             manage_package('uninstall -y', package, auth_data=self.auth_data)
 
     def update(self, packages):
         packages = parse_packages(packages)
         requirements = self.get_requirements('default')
         dev_requirements = self.get_requirements('development')
-        peer_requirements = self.get_requirements('peer')
 
         for name, package in packages.items():
-            if not (name in requirements or name in dev_requirements or name in peer_requirements):
+            if not (name in requirements or name in dev_requirements):
                 raise Exception('Dependency not found')                
 
             new_version = manage_package('install --upgrade', name, package, auth_data=self.auth_data)
@@ -233,9 +193,6 @@ class Manager():
             if name in dev_requirements:
                 dev_requirements[name]['deps_version'] = new_version
 
-            if name in peer_requirements:
-                peer_requirements[name]['deps_version'] = new_version
 
         self.update_packages(requirements, 'default')
         self.update_packages(dev_requirements, 'development')
-        self.update_packages(peer_requirements, 'peer')

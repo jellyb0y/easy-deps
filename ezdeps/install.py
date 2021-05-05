@@ -12,9 +12,6 @@ def install(manager: Manager, directive_params: list, params: dict):
     elif ('D' in params or 'development' in params):
         deps_type = 'development'
         packages = params['D'] if 'D' in params else params['development']
-    elif ('P' in params or 'peer' in params):
-        deps_type = 'peer'
-        packages = params['P'] if 'P' in params else params['peer']
     elif ('A' in params or 'all' in params):
         deps_type = 'all'
         packages = None
