@@ -36,19 +36,38 @@ def parse_packages(packages: str):
 
     return parsed_packages
 
-def manage_package(command: str, name: str, package: dict = None):
+def use_auth(source: str, auth_data: dict = {}):
+    def auth_provider(match):
+        domain = match.group(1)
+
+        auth_string = ''
+        if domain in auth_data:
+            domain_data = auth_data[domain]
+            auth_string = f'{domain_data["USER"]}:{domain_data["PASSWORD"]}@'
+
+        return f'//{auth_string}{domain}/'
+
+    domain_regexp = r'//([^/]*)'
+    return re.sub(domain_regexp, auth_provider, source)
+
+def manage_package(command: str, name: str, package: dict = None, auth_data: dict = {}):
         version = package and package['version']
         source = package and package['source']
+        if source:
+            source = use_auth(source, auth_data)
 
         req_line = name if not version else f'{name}{version}'
         if source:
             req_line = f'--index-url {source} --no-deps {req_line}'
         
-        system(f'python3 -m pip {command} {req_line}')
+        if system(f'python3 -m pip {command} {req_line}'):
+            raise Exception('Error installing pip module')
+        
         requirements = ([str(r) for r in get_distribution(name).requires()])
 
         for requirement in requirements:
             req_line = requirement.replace('>', r'\>')
-            system(f'python3 -m pip install {req_line}')
-
+            if system(f'python3 -m pip install {req_line}'):
+                raise Exception('Error installing pip module')
+            
         return get_distribution(name).version

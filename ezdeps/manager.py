@@ -1,8 +1,9 @@
-from .utils.constants import PACKAGE_FILE
+from .utils.constants import PACKAGE_FILE, RC_FILE
 from .utils.merge import merge_dicts
 from .utils.packages import parse_packages, parse_version, manage_package
 
 from json import dumps, loads
+import re
 
 
 class Manager():
@@ -12,10 +13,17 @@ class Manager():
     description: str = None
     dependencies: list = None
     dev_dependencies: list = None
+    auth_data: dict = None
 
-    def __init__(self, file_path: str = None):
-        project = {}
+    def __init__(self, file_path: str = None, rc_path: str = None):
         self.file_path = file_path or PACKAGE_FILE
+        self.parse_project_file()
+
+        self.rc_path = rc_path or RC_FILE
+        self.parse_rc_file()
+
+    def parse_project_file(self):
+        project = {}
 
         try:
             fh = open(self.file_path, 'r+')
@@ -35,6 +43,34 @@ class Manager():
         self.description = 'description' in project and project['description']
         self.dependencies = project['dependencies'] if 'dependencies' in project else {} 
         self.dev_dependencies = project['dev_dependencies'] if 'dev_dependencies' in project else {}
+
+    def parse_rc_file(self):
+        self.auth_data = {}
+
+        try:
+            fh = open(self.rc_path, 'r+')
+
+            directive_regexp = re.compile(r'\[([^]]*)\]')
+            props_regexp = re.compile(r'([^=]*)=([^\s]*)')
+            comments_regexp = r'#.*$'
+            active_directive = None
+
+            for line in fh.readlines():
+                clear_line = re.sub(comments_regexp, '', line)
+
+                directive_match = directive_regexp.search(clear_line)
+                if directive_match:
+                    active_directive = directive_match[1]
+                    self.auth_data[active_directive] = {}
+                
+                props_match = props_regexp.search(clear_line)
+                if props_match:
+                    props_name = props_match[1]
+                    props_value = props_match[2]
+                    self.auth_data[active_directive][props_name] = props_value
+
+        except Exception:
+            pass
 
     def write(self):
         with open(self.file_path, 'w+') as fh:
@@ -98,7 +134,7 @@ class Manager():
             requirements = self.get_requirements(is_dev)
         
         for name, requirement in requirements.items():
-            new_version = manage_package('install', name, requirement)
+            new_version = manage_package('install', name, requirement, auth_data=self.auth_data)
             if not requirement['deps_version']:
                 requirement['deps_version'] = new_version
 
@@ -113,7 +149,7 @@ class Manager():
             if package in self.dev_dependencies:
                 del self.dev_dependencies[package]
 
-            manage_package('uninstall -y', package)
+            manage_package('uninstall -y', package, auth_data=self.auth_data)
 
     def update(self, packages):
         packages = parse_packages(packages)
@@ -124,7 +160,7 @@ class Manager():
             if (name not in requirements and name not in requirements_dev):
                 raise Exception('Dependency not found')                
 
-            new_version = manage_package('install --upgrade', name, package)
+            new_version = manage_package('install --upgrade', name, package, auth_data=self.auth_data)
 
             if name in requirements:
                 requirements_dev[name]['deps_version'] = new_version

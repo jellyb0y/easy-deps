@@ -16,7 +16,8 @@ if not directive:
     exit()
 
 file_path = 'f' in params and params['f']
-manager = Manager(file_path)
+rc_path = 'r' in params and params['r']
+manager = Manager(file_path, rc_path)
 
 if directive == 'install':
     install(manager, directive_parmas, params)

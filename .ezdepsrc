@@ -1,0 +1,11 @@
+[gitlab.com]
+USER=myuser # Test user for gitlab regitsry
+PASSWORD=topsecret # Test passwd for gitlab regitsry
+
+[github.com]
+USER=myuser # Test user for github regitsry
+PASSWORD=topsecret # Test passwd for github regitsry
+
+[test]
+USER=myuser # Test user for github regitsry
+PASSWORD=topsecret # Test passwd for github regitsry
