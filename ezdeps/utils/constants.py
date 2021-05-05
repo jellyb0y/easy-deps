@@ -6,4 +6,4 @@ CUR_DIR = getcwd()
 
 DOCS_PATH = f'{ROOT_DIR}/resources/docs.txt'
 PACKAGE_FILE = f'{CUR_DIR}/.ezdeps.json'
-RC_FILE = f'{CUR_DIR}/.ezdepsrc'
+RC_FILE = f'~/.ezdepsrc'
