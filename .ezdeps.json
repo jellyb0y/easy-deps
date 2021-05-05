@@ -1,0 +1,11 @@
+{
+    "name": "ezdeps",
+    "version": "1.0.0a",
+    "description": "Package manager for python",
+    "dependencies": {
+        "reptile": "1.0.2"
+    },
+    "dev_dependencies": {
+        "reptile": "1.0.2"
+    }
+}
