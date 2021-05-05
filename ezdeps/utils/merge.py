@@ -1,6 +1,6 @@
 def merge_dicts(dict1: dict, dict2: dict):
     new_dict = { **dict1, **dict2 }
-    union_keys = dict1.keys() and dict2.keys()
+    union_keys = set(dict1.keys()) & set(dict2.keys())
 
     for key in union_keys:
         dict1_value = dict1[key]

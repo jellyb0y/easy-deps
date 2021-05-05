@@ -1,11 +1,17 @@
 {
     "name": "ezdeps",
-    "version": "1.0.0a",
+    "version": "1.0.0a0",
     "description": "Package manager for python",
-    "dependencies": {
-        "reptile": "1.0.2"
+    "author": {
+        "name": "Vitaly Kisel<https://github.com/jellyb0y>",
+        "email": "kisel@internet.ru"
     },
-    "dev_dependencies": {
-        "reptile": "1.0.2"
+    "scripts": [
+        "./scripts/ezdeps"
+    ],
+    "dependencies": {},
+    "dev_dependencies": {},
+    "peer_dependencies": {
+        "pip": "^20.0.0"
     }
 }

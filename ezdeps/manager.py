@@ -13,7 +13,10 @@ class Manager():
     description: str = None
     dependencies: list = None
     dev_dependencies: list = None
+    peer_dependencies: list = None
     auth_data: dict = None
+    author: dict = None
+    scripts: dict = None
 
     def __init__(self, file_path: str = None, rc_path: str = None):
         self.file_path = file_path or PACKAGE_FILE
@@ -43,6 +46,9 @@ class Manager():
         self.description = 'description' in project and project['description']
         self.dependencies = project['dependencies'] if 'dependencies' in project else {} 
         self.dev_dependencies = project['dev_dependencies'] if 'dev_dependencies' in project else {}
+        self.peer_dependencies = project['peer_dependencies'] if 'peer_dependencies' in project else {}
+        self.author = project['author'] if 'author' in project else {}
+        self.scripts = project['scripts'] if 'scripts' in project else {}
 
     def parse_rc_file(self):
         self.auth_data = {}
@@ -78,15 +84,23 @@ class Manager():
                 'name': self.name,
                 'version': self.version,
                 'description': self.description,
+                'author': self.author,
+                'scripts': self.scripts,
                 'dependencies': self.dependencies,
-                'dev_dependencies': self.dev_dependencies
+                'dev_dependencies': self.dev_dependencies,
+                'peer_dependencies': self.peer_dependencies,
             }
 
             fh.write(dumps(project, indent=4))
             fh.close()
 
-    def get_requirements(self, is_dev = False):
-        requirements = self.dependencies if not is_dev else self.dev_dependencies
+    def get_requirements(self, deps_type: str = 'default'):
+        requirements = self.dependencies
+        if deps_type == 'development':
+            requirements = self.dev_dependencies
+        elif deps_type == 'peer':
+            requirements = self.peer_dependencies
+        
         pip_requirements = {}
 
         for name, value in requirements.items():
@@ -107,7 +121,7 @@ class Manager():
             
         return pip_requirements
 
-    def update_packages(self, packages: dict, is_dev = False):
+    def update_packages(self, packages: dict, deps_type: str = 'default'):
         new_packages = {}
         
         for name, package in packages.items():
@@ -122,24 +136,30 @@ class Manager():
             else:
                 new_packages[name] = deps_version
 
-        if is_dev:
+        if deps_type == 'development':
             self.dev_dependencies = merge_dicts(self.dev_dependencies, new_packages)
-        else:
+        elif deps_type == 'default':
             self.dependencies = merge_dicts(self.dependencies, new_packages)
+        elif deps_type == 'peer':
+            self.peer_dependencies = merge_dicts(self.peer_dependencies, new_packages)
 
-    def install(self, packages: list = [], is_dev = False):
+    def install(self, packages: list = None, deps_type: str = 'default'):
         if packages:
             requirements = parse_packages(packages)
         else:
-            requirements = self.get_requirements(is_dev)
-        
+            if deps_type == 'all':
+                requirements = self.get_requirements('default')
+                requirements = merge_dicts(requirements, self.get_requirements('development'))
+            else:
+                requirements = self.get_requirements(deps_type)
+
         for name, requirement in requirements.items():
             new_version = manage_package('install', name, requirement, auth_data=self.auth_data)
             if not requirement['deps_version']:
                 requirement['deps_version'] = new_version
 
         if packages:
-            self.update_packages(requirements, is_dev)
+            self.update_packages(requirements, deps_type)
 
     def uninstall(self, packages):
         for package in packages:
@@ -149,24 +169,32 @@ class Manager():
             if package in self.dev_dependencies:
                 del self.dev_dependencies[package]
 
+            if package in self.peer_dependencies:
+                del self.peer_dependencies[package]
+
             manage_package('uninstall -y', package, auth_data=self.auth_data)
 
     def update(self, packages):
         packages = parse_packages(packages)
-        requirements = self.get_requirements()
-        requirements_dev = self.get_requirements(is_dev=True)
+        requirements = self.get_requirements('default')
+        dev_requirements = self.get_requirements('development')
+        peer_requirements = self.get_requirements('peer')
 
         for name, package in packages.items():
-            if (name not in requirements and name not in requirements_dev):
+            if not (name in requirements or name in dev_requirements or name in peer_requirements):
                 raise Exception('Dependency not found')                
 
             new_version = manage_package('install --upgrade', name, package, auth_data=self.auth_data)
 
             if name in requirements:
-                requirements_dev[name]['deps_version'] = new_version
-            
-            if name in requirements_dev:
                 requirements[name]['deps_version'] = new_version
+            
+            if name in dev_requirements:
+                dev_requirements[name]['deps_version'] = new_version
 
-        self.update_packages(requirements)
-        self.update_packages(requirements_dev, True)
+            if name in peer_requirements:
+                peer_requirements[name]['deps_version'] = new_version
+
+        self.update_packages(requirements, 'default')
+        self.update_packages(dev_requirements, 'development')
+        self.update_packages(peer_requirements, 'peer')
