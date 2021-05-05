@@ -196,6 +196,5 @@ class Manager():
             if name in dev_requirements:
                 dev_requirements[name]['deps_version'] = new_version
 
-
         self.update_packages(requirements, 'default')
         self.update_packages(dev_requirements, 'development')
