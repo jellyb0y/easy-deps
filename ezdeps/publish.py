@@ -16,7 +16,16 @@ def publish(manager: Manager, params):
         raise Exception('Repository not found at your `.ezdepsrc` file')
 
     auth_params = auth_data[repository_name]
-    twine_auth = f'TWINE_USERNAME={auth_params["username"]} TWINE_PASSWORD={auth_params["password"]}'
+
+    twine_username = auth_params["username"]
+    if 'twine-username' in params:
+        twine_username = params['twine-username'][0]
+
+    twine_password = auth_params["password"]
+    if 'twine-password' in params:
+        twine_password = params['twine-password'][0]
+
+    twine_auth = f'TWINE_USERNAME={twine_username} TWINE_PASSWORD={twine_password}'
 
     if 'repository-url' not in params:
         params_line = f'--repository {repository_name}'
