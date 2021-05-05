@@ -21,7 +21,7 @@ def parse_packages(packages: list):
     Returns parsed packages from cli
     """
 
-    regexp = re.compile(r'^([a-zA-Z_-]*)(?:@([^#]*))?(?:#(.*))?$')
+    regexp = re.compile(r'^([a-zA-Z0-9_-]*)(?:@([^#]*))?(?:#(.*))?$')
     parsed_packages = {}
 
     for package in packages:
