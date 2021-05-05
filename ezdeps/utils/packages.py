@@ -58,7 +58,7 @@ def manage_package(
     deps = True
 ):
         version = package and package['version']
-        source = package and package['source']
+        source = package and 'source' in package and package['source']
         if source:
             source = use_auth(source, auth_data)
 

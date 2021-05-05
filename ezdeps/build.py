@@ -11,18 +11,19 @@ def build(manager: Manager):
     temp_file = f'{CUR_DIR}/{manager.name}/.ezdeps.json'
     copyfile(PACKAGE_FILE, temp_file)
 
+    print(manager.scripts)
+
     setuptools.setup(
         name=manager.name,
         version=manager.version,
         author='name' in manager.author and manager.author['name'],
         author_email='email' in manager.author and manager.author['email'],
         description=manager.description,
+        scripts=manager.scripts,
         long_description=manager.get_documentation(),
         long_description_content_type='text/markdown',
-        packages=setuptools.find_packages(
-            exclude=list(manager.dev_dependencies.keys())
-        ),
-        install_requires=manager.get_only_pip_requirements('peer'),
+        packages=setuptools.find_packages(),
+        install_requires=manager.get_pip_requirements('peer'),
         include_package_data=manager.include_package_data,
         classifiers=manager.classifiers,
         python_requires=manager.python_requires

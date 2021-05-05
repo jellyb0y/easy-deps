@@ -53,7 +53,7 @@ class Manager():
         self.dev_dependencies = project['dev_dependencies'] if 'dev_dependencies' in project else {}
         self.peer_dependencies = project['peer_dependencies'] if 'peer_dependencies' in project else {}
         self.author = project['author'] if 'author' in project else {}
-        self.scripts = project['scripts'] if 'scripts' in project else {}
+        self.scripts = project['scripts'] if 'scripts' in project else []
         self.documentation_path = 'documentation_path' in project and project['documentation_path']
         self.python_requires = project['python_requires'] if 'python_requires' in project else f'>={python_version()}'
         self.classifiers = project['classifiers'] if 'classifiers' in project else []
@@ -146,14 +146,11 @@ class Manager():
             
         return pip_requirements
 
-    def get_only_pip_requirements(self, deps_type: str = 'default'):
+    def get_pip_requirements(self, deps_type: str = 'default'):
         dependencies = self.get_requirements(deps_type)
         requirements = []
         
-        for key, dependency in dependencies.items():
-            if ('source' in dependency and dependency['source']):
-                continue
-            
+        for key, dependency in dependencies.items():            
             version = dependency['version'].replace('\\', '')
             requirements.append(f'{key}{version}')
         

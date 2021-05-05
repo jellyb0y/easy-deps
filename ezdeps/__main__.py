@@ -30,9 +30,9 @@ elif directive == 'update':
 elif directive == 'build':
     build(manager)
     if directive_params == ['publish']:
-        publish(params)
+        publish(manager, params)
 elif directive == 'publish':
-    publish(params)
+    publish(manager, params)
 else:
     raise Exception(f'Unexpected directive `{directive}`')
 
