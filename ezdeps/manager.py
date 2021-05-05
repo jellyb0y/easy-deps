@@ -21,6 +21,7 @@ class Manager():
     python_requires: str = None
     classifiers: list = None
     include_package_data: bool = None
+    url: str = None
 
     def __init__(self, file_path: str = None, rc_path: str = None):
         self.file_path = file_path or PACKAGE_FILE
@@ -56,6 +57,7 @@ class Manager():
         self.python_requires = project['python_requires'] if 'python_requires' in project else f'>={python_version()}'
         self.classifiers = project['classifiers'] if 'classifiers' in project else []
         self.include_package_data = 'include_package_data' in project and project['include_package_data']
+        self.url = 'url' in project and project['url']
 
     def parse_rc_file(self):
         self.auth_data = {}
@@ -105,12 +107,13 @@ class Manager():
                 'description': self.description,
                 'documentation_path': self.documentation_path,
                 'author': self.author,
+                'url': self.url,
                 'scripts': self.scripts,
                 'dependencies': self.dependencies,
                 'dev_dependencies': self.dev_dependencies,
                 'python_requires': self.python_requires,
                 'classifiers': self.classifiers,
-                'include_package_data': self.include_package_data
+                'include_package_data': self.include_package_data,
             }
 
             fh.write(dumps(project, indent=4))

@@ -20,6 +20,7 @@ def build(manager: Manager):
         author='name' in manager.author and manager.author['name'],
         author_email='email' in manager.author and manager.author['email'],
         description=manager.description,
+        url=manager.url,
         scripts=manager.scripts,
         long_description=manager.get_documentation(),
         long_description_content_type='text/markdown',
