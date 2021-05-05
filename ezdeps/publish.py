@@ -17,15 +17,15 @@ def publish(manager: Manager, params):
 
     auth_params = auth_data[repository_name]
 
-    twine_username = auth_params["username"]
-    if 'twine-username' in params:
-        twine_username = params['twine-username'][0]
+    username = auth_params["username"]
+    if 'username' in params:
+        username = params['username'][0]
 
-    twine_password = auth_params["password"]
-    if 'twine-password' in params:
-        twine_password = params['twine-password'][0]
+    password = auth_params["password"]
+    if 'password' in params:
+        password = params['password'][0]
 
-    twine_auth = f'TWINE_USERNAME={twine_username} TWINE_PASSWORD={twine_password}'
+    twine_auth = f'TWINE_USERNAME={username} TWINE_PASSWORD={password}'
 
     if 'repository-url' not in params:
         params_line = f'--repository {repository_name}'
