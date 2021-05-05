@@ -18,6 +18,9 @@ def publish(manager: Manager, params):
     auth_params = auth_data[repository_name]
     twine_auth = f'TWINE_USERNAME={auth_params["username"]} TWINE_PASSWORD={auth_params["password"]}'
 
+    if 'repository_name' in params:
+        repository_name = params['repository_name']
+
     if 'repository_url' not in params:
         params_line = f'--repository {repository_name}'
     else:

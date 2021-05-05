@@ -5,7 +5,5 @@ PASSWORD=topsecret # Test passwd for gitlab regitsry
 [github.com]
 USER=myuser # Test user for github regitsry
 PASSWORD=topsecret # Test passwd for github regitsry
-
-[test]
-USER=myuser # Test user for github regitsry
-PASSWORD=topsecret # Test passwd for github regitsry
+REPOSITORY_URL=https://example.com/ # regitsry url for github (optional)
+REPOSITORY_NAME=github # regitsry name (optional) to rewrite `github.com` to `github`
