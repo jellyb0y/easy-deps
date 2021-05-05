@@ -1,7 +1,8 @@
 import re
 from json import loads
 from os import system
-from pkg_resources import get_distribution
+import pkg_resources as pkg
+from importlib import reload
 
 def parse_version(version: str):
     """
@@ -100,7 +101,7 @@ def manage_package(
         
         if source:
             try:
-                pip_package = get_distribution(name)
+                pip_package = pkg.get_distribution(name)
                 path_to_config = f'{pip_package.location}/{pip_package._key}/.ezdeps.json'
 
                 try:
@@ -120,6 +121,7 @@ def manage_package(
                 pass
         
         try:
-            return get_distribution(name).version
+            reload(pkg)
+            return pkg.get_distribution(name).version
         except Exception:
             return
