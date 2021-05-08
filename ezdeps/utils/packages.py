@@ -43,7 +43,13 @@ def use_auth(source: str, auth_data: dict = {}):
         domain = match.group(1)
 
         auth_string = ''
-        if domain in auth_data:
+        common_auth_data = auth_data['@common']
+        username = common_auth_data['username']
+        password = common_auth_data['password']
+
+        if username and password:
+            auth_string = f'{username}:{password}@'
+        elif domain in auth_data:
             domain_data = auth_data[domain]
             auth_string = f'{domain_data["username"]}:{domain_data["password"]}@'
 

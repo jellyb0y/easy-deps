@@ -19,7 +19,7 @@ if not directive:
 
 file_path = 'f' in params and params['f']
 rc_path = 'r' in params and params['r']
-manager = Manager(file_path, rc_path)
+manager = Manager(params, file_path, rc_path)
 
 write_file = True
 if ('J' in params or 'without-json' in params):
