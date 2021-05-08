@@ -21,6 +21,20 @@ file_path = 'f' in params and params['f']
 rc_path = 'r' in params and params['r']
 manager = Manager(file_path, rc_path)
 
+write_file = True
+if ('J' in params or 'without-json' in params):
+    if 'J' in params:
+        options = params['J']
+        del params['J']
+    else:
+        options = params['without-json']
+        del params['without-json']
+
+    if not isinstance(options, bool):
+        directive_params.extend(options)
+
+    write_file = False
+
 if directive == 'install':
     install(manager, directive_params, params)
 elif directive == 'uninstall':
@@ -36,5 +50,5 @@ elif directive == 'publish':
 else:
     raise Exception(f'Unexpected directive `{directive}`')
 
-if not ('J' in params and 'without-json' in params):
+if write_file:
     manager.write()
