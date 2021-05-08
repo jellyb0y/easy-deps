@@ -12,8 +12,6 @@ def build(manager: Manager):
     temp_file = f'{CUR_DIR}/{manager.name}/.ezdeps.json'
     copyfile(PACKAGE_FILE, temp_file)
 
-    print(manager.scripts)
-
     setuptools.setup(
         name=manager.name,
         version=manager.version,

@@ -36,4 +36,5 @@ elif directive == 'publish':
 else:
     raise Exception(f'Unexpected directive `{directive}`')
 
-manager.write()
+if not ('J' in params and 'without-json' in params):
+    manager.write()

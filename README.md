@@ -69,6 +69,12 @@ Commands:
     - options:
         - `<-C | --clear>`                          Clear temp files after publishing
         - `<-R | --repository>`                     Set up repository name in your `.ezdepsrc`
+        - `<--repository-url> [url]`                Set up repository url
+        - `<--username> [username]`                 Set up registry username
+        - `<--password> [password]`                 Set up registry password
+
+Common options:
+    - `<-J | --without-json>`                   Do not write json file
 
 ## Using `.ezdepsrc`
 
