@@ -45,7 +45,7 @@ def use_auth(source: str, auth_data: dict = {}):
         auth_string = ''
         if domain in auth_data:
             domain_data = auth_data[domain]
-            auth_string = f'{domain_data["user"]}:{domain_data["password"]}@'
+            auth_string = f'{domain_data["username"]}:{domain_data["password"]}@'
 
         return f'//{auth_string}{domain}/'
 
