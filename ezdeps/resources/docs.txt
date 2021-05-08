@@ -27,3 +27,6 @@ Commands:
             <--repository-url> [url]                Set up repository url
             <--username> [username]                 Set up registry username
             <--password> [password]                 Set up registry password 
+
+Common options:
+    <-J | --without-json>                   Do not write json file

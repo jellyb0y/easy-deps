@@ -15,7 +15,7 @@ def get_setup_params():
     params = {}
 
     param_name = None
-    regexp = re.compile(r'-([a-zA-Z])$|--([^-][a-zA-Z_-]*)$')
+    regexp = re.compile(r'^-([a-zA-Z])$|^--([^-][a-zA-Z_-]*)$')
 
     for arg in sys.argv[1:]:
         match = regexp.search(arg)

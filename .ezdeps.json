@@ -1,6 +1,6 @@
 {
     "name": "ezdeps",
-    "version": "1.1.6",
+    "version": "1.1.7",
     "description": "Package manager for python",
     "documentation_path": "./README.md",
     "author": {
