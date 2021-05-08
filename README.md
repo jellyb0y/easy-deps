@@ -73,6 +73,9 @@ Commands:
         - `<--username> [username]`                 Set up registry username
         - `<--password> [password]`                 Set up registry password
 
+Common options:
+    - `<-J | --without-json>`                   Do not write json file
+
 ## Using `.ezdepsrc`
 
 To store your keys and tokens you have to create `~/.ezdepsrc` file:  
