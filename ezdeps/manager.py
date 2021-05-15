@@ -210,7 +210,6 @@ class Manager():
             else:
                 raise Exception('Dependency not found')
             
-            print(package)
             new_version = manage_package('install --upgrade', name, package, auth_data=self.auth_data)
 
             if name in requirements:
