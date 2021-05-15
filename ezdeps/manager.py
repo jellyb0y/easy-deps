@@ -201,9 +201,13 @@ class Manager():
         dev_requirements = self.get_requirements('development')
 
         for name, package in packages.items():
-            if not (name in requirements or name in dev_requirements):
-                raise Exception('Dependency not found')                
-
+            if name in requirements:
+                package.update(requirements[name])
+            elif name in dev_requirements:
+                package.update(dev_requirements[name])
+            else:
+                raise Exception('Dependency not found')
+            
             new_version = manage_package('install --upgrade', name, package, auth_data=self.auth_data)
 
             if name in requirements:
