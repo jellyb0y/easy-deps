@@ -23,12 +23,14 @@ class Manager():
     include_package_data: bool = None
     url: str = None
 
-    def __init__(self, file_path: str = None, rc_path: str = None):
+    def __init__(self, params: dict, file_path: str = None, rc_path: str = None):
         self.file_path = file_path or PACKAGE_FILE
         self.parse_project_file()
 
         self.rc_path = rc_path or RC_FILE
         self.parse_rc_file()
+
+        self.parse_auth_params_from_params(params)
 
     def parse_project_file(self):
         project = {}
@@ -86,6 +88,20 @@ class Manager():
 
         except Exception:
             pass
+
+    def parse_auth_params_from_params(self, params: dict):
+        username = None
+        if 'username' in params:
+            username = params['username'][0]
+        
+        password = None
+        if 'password' in params:
+            password = params['password'][0]
+
+        self.auth_data['@common'] = {
+            'username': username,
+            'password': password
+        }
 
     def get_documentation(self):
         if not self.documentation_path:
@@ -185,9 +201,16 @@ class Manager():
         dev_requirements = self.get_requirements('development')
 
         for name, package in packages.items():
-            if not (name in requirements or name in dev_requirements):
-                raise Exception('Dependency not found')                
-
+            if name in requirements:
+                if 'source' in requirements[name]:
+                    package['source'] = requirements[name]['source']
+            elif name in dev_requirements:
+                if 'source' in dev_requirements[name]:
+                    package['source'] = dev_requirements[name]['source']
+            else:
+                raise Exception('Dependency not found')
+            
+            print(package)
             new_version = manage_package('install --upgrade', name, package, auth_data=self.auth_data)
 
             if name in requirements:

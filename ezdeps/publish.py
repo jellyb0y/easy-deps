@@ -19,16 +19,14 @@ def publish(manager: Manager, params):
         raise Exception('You must provide repository name using `-R` or `--repository`')
 
     auth_data = manager.auth_data
-    if repository_name in auth_data:
+    common_auth_data = auth_data['@common']
+    username = common_auth_data['username']
+    password = common_auth_data['password']
+
+    if ((not username or not password) and repository_name in auth_data):
         auth_params = auth_data[repository_name]
         username = auth_params["username"]
         password = auth_params["password"]
-    
-    if 'username' in params:
-        username = params["username"][0]
-
-    if 'password' in params:
-        password = params["password"][0]
 
     twine_auth = []
     if username:

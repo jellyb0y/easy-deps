@@ -43,7 +43,13 @@ def use_auth(source: str, auth_data: dict = {}):
         domain = match.group(1)
 
         auth_string = ''
-        if domain in auth_data:
+        common_auth_data = auth_data['@common']
+        username = common_auth_data['username']
+        password = common_auth_data['password']
+
+        if username and password:
+            auth_string = f'{username}:{password}@'
+        elif domain in auth_data:
             domain_data = auth_data[domain]
             auth_string = f'{domain_data["username"]}:{domain_data["password"]}@'
 
@@ -88,9 +94,10 @@ def manage_package(
     auth_data: dict = {}
 ):
         version = package and package['version']
-        source = package and 'source' in package and package['source']
-        if source:
-            source = use_auth(source, auth_data)
+        package_source = package and 'source' in package and package['source']
+        source = None
+        if package_source:
+            source = use_auth(package_source, auth_data)
 
         req_line = name if not version else f'{name}{version}'
         if source:
