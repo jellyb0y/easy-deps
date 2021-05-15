@@ -13,9 +13,11 @@ def publish(manager: Manager, params):
         repository_name = params['R'][0]
     elif 'repository' in params:
         repository_name = params['repository'][0]
-    elif 'repository-url' in params:
+    
+    if 'repository-url' in params:
         repository_url = params['repository-url'][0]
-    else:
+    
+    if not (repository_name or repository_url):
         raise Exception('You must provide repository name using `-R` or `--repository`')
 
     auth_data = manager.auth_data
