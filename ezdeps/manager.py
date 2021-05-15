@@ -202,12 +202,15 @@ class Manager():
 
         for name, package in packages.items():
             if name in requirements:
-                package.update(requirements[name])
+                if 'source' in requirements[name]:
+                    package['source'] = requirements[name]['source']
             elif name in dev_requirements:
-                package.update(dev_requirements[name])
+                if 'source' in dev_requirements[name]:
+                    package['source'] = dev_requirements[name]['source']
             else:
                 raise Exception('Dependency not found')
             
+            print(package)
             new_version = manage_package('install --upgrade', name, package, auth_data=self.auth_data)
 
             if name in requirements:

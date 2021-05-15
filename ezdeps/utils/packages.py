@@ -95,6 +95,7 @@ def manage_package(
 ):
         version = package and package['version']
         package_source = package and 'source' in package and package['source']
+        source = None
         if package_source:
             source = use_auth(package_source, auth_data)
 
