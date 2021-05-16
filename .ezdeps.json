@@ -1,6 +1,6 @@
 {
     "name": "ezdeps",
-    "version": "1.1.11",
+    "version": "1.2.0",
     "description": "Package manager for python",
     "documentation_path": "./README.md",
     "author": {
@@ -14,12 +14,13 @@
     "dependencies": {
         "pip": "^20.0.0",
         "wheel": "0.36.2",
+        "setuptools": "56.2.0",
         "twine": "3.4.1"
     },
     "dev_dependencies": {},
-    "python_requires": ">=3.8",
+    "python_requires": ">=3.6",
     "classifiers": [
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
     ],
